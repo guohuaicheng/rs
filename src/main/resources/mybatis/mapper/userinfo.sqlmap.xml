@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qiqi.rs.admin.platform.user.dao.UserInfoDao">
+
+    <resultMap id="user_column_map" type="com.qiqi.rs.admin.platform.user.model.UserInfo">
+        <result column="user_id" property="userId"/>
+        <result column="user_code" property="userCode"/>
+        <result column="username" property="username"/>
+        <result column="nickname" property="nickname"/>
+        <result column="mobile_phone" property="mobilePhone"/>
+        <result column="role" property="role"/>
+        <result column="permission" property="permission"/>
+        <result column="description" property="description"/>
+        <result column="enable_flag" property="enableFlag"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="created_user" property="createdUser"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_user" property="updatedUser"/>
+        <result column="updated_time" property="updatedTime"/>
+        <result column="created_device" property="createdDevice"/>
+        <result column="created_device_ip" property="createdDeviceIp"/>
+        <result column="updated_device" property="updatedDevice"/>
+        <result column="updated_device_ip" property="updatedDeviceIp"/>
+    </resultMap>
+
+    <sql id="all_column">
+        user_id,
+        username,
+        nickname,
+        user_code,
+        mobile_phone,
+        role,
+        permission,
+        description,
+        enable_flag,
+        del_flag,
+        created_user,
+        created_time,
+        updated_user,
+        updated_time,
+        created_device,
+        created_device_ip,
+        updated_device,
+        updated_device_ip
+    </sql>
+
+    <select id="selectLastCode" resultType="java.lang.String">
+        SELECT user_code FROM p_user_info where del_flag = 0 ORDER BY created_time DESC limit 1
+    </select>
+
+    <insert id="insert">
+        INSERT INTO p_user_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            user_id,
+            user_code,
+            username,
+            mobile_phone,
+            role,
+            <if test="permission != null">permission,</if>
+            <if test="nickname != null">nickname,</if>
+            <if test="description != null">description,</if>
+            <if test="enableFlag != null">enable_flag,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createdUser != null">created_user,</if>
+            <if test="createdTime != null">created_time,</if>
+            <if test="createdDevice != null">created_device,</if>
+            <if test="createdDeviceIp != null">created_device_ip,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{userId},
+            #{userCode},
+            #{username},
+            #{mobilePhone},
+            #{role},
+            <if test="permission != null">#{permission},</if>
+            <if test="nickname != null">#{nickname},</if>
+            <if test="description != null">#{description},</if>
+            <if test="enableFlag != null">#{enableFlag},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createdUser != null">#{createdUser},</if>
+            <if test="createdTime != null">#{createdTime},</if>
+            <if test="createdDevice != null">#{createdDevice},</if>
+            <if test="createdDeviceIp != null">#{createdDeviceIp},</if>
+        </trim>
+    </insert>
+
+    <update id="update">
+        UPDATE p_user_info
+        <set>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="mobilePhone != null">mobile_phone = #{mobilePhone},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="enableFlag != null">enable_flag = #{enableFlag},</if>
+            <if test="role != null">role = #{role},</if>
+            <if test="permission != null">permission = #{permission},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="updatedUser != null">updated_user = #{updatedUser},</if>
+            <if test="updatedTime != null">updated_time = #{updatedTime},</if>
+            <if test="updatedDevice != null">updated_device = #{updatedDevice},</if>
+            <if test="updatedDeviceIp != null">updated_device_ip = #{updatedDeviceIp}</if>
+        </set>
+        WHERE user_id = #{userId}
+    </update>
+
+    <select id="select" resultMap="user_column_map">
+        SELECT
+        u.user_id,
+        u.username,
+        u.nickname,
+        u.user_code,
+        u.mobile_phone,
+        u.role,
+        u.permission,
+        u.description,
+        u.enable_flag,
+        u.created_time,
+        a.password
+        FROM p_user_info u
+        LEFT JOIN p_user_auth a ON u.user_id = a.user_id <!--    用于编辑用户密码    -->
+        <where>
+            AND u.del_flag = 0
+            <if test="enableFlag != null">AND u.enable_flag = #{enableFlag}</if>
+            <if test="role != null">AND u.role = #{role}</if>
+            <if test="keyword != null and keyword.trim() != ''">
+                <bind name="kw" value="'%' + _parameter.keyword + '%'"/>
+                AND (u.user_code LIKE #{kw}
+                OR u.nickname LIKE #{kw}
+                OR u.mobile_phone LIKE #{kw}
+                )
+            </if>
+        </where>
+    </select>
+
+    <select id="selectBasicInfo" resultMap="user_column_map">
+        SELECT
+        u.user_id,
+        u.user_code,
+        u.nickname
+        FROM p_user_info u
+        <where>
+            AND del_flag = 0 AND enable_flag = 1
+            <if test="userId != null">AND u.user_id = #{userId}</if>
+            <if test="nickname != null">AND u.nickname = #{nickname}</if>
+            <if test="userCode != null">AND u.user_code = #{userCode}</if>
+            <if test="role != null">AND u.role = #{role}</if>
+        </where>
+    </select>
+
+    <select id="selectByCodeForCheckIfExists" resultMap="user_column_map">
+        SELECT user_id, user_code
+        FROM p_user_info
+        WHERE del_flag = 0 AND user_code = #{userCode} limit 1
+    </select>
+
+    <select id="selectByNameForCheckIfExists" resultMap="user_column_map">
+        SELECT user_id, nickname
+        FROM p_user_info
+        WHERE del_flag = 0 AND nickname = #{nickname} limit 1
+    </select>
+
+    <select id="selectByMobileForCheckIfExists" resultMap="user_column_map">
+        SELECT user_id, mobile_phone
+        FROM p_user_info
+        WHERE del_flag = 0 AND mobile_phone = #{mobilePhone} limit 1
+    </select>
+
+    <!--<select id="selectInviteTenant" resultMap="tenant_info_map">-->
+        <!--SELECT-->
+          <!--i.created_time,-->
+          <!--t.username,-->
+          <!--t.tenant_name,-->
+          <!--t.mobile_phone-->
+        <!--FROM p_tenant_invite i-->
+        <!--LEFT JOIN p_tenant_info t ON i.invite_id = t.tenant_id-->
+        <!--WHERE i.tenant_id = #{userId}-->
+    <!--</select>-->
+
+    <select id="selectById" resultMap="user_column_map">
+        SELECT
+        <include refid="all_column"/>
+        FROM p_user_info
+        WHERE user_id = #{userId} AND del_flag = 0
+    </select>
+
+    <select id="selectByIdForOpt" resultMap="user_column_map">
+        SELECT
+        u.user_id,
+        u.username,
+        u.nickname,
+        u.user_code,
+        u.mobile_phone,
+        u.role,
+        u.permission,
+        u.description,
+        u.enable_flag,
+        u.created_time,
+        a.password
+        FROM p_user_info u
+        LEFT JOIN p_user_auth a ON u.user_id = a.user_id <!--    用于编辑用户密码    -->
+        WHERE u.user_id = #{userId} AND u.del_flag = 0
+    </select>
+
+    <select id="selectByCode" resultMap="user_column_map">
+        SELECT
+        <include refid="all_column"/>
+        FROM p_user_info
+        WHERE user_code = #{user_code}
+    </select>
+
+    <delete id="delete">
+        DELETE FROM p_user_info where user_id = #{userId}
+    </delete>
+</mapper>

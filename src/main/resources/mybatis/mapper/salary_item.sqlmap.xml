@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qiqi.rs.admin.platform.salary.dao.SalaryItemDao">
+
+    <resultMap id="SalaryItem" type="com.qiqi.rs.admin.platform.salary.model.SalaryItem">
+    </resultMap>
+
+    <resultMap id="SalaryItemDTO" type="com.qiqi.rs.admin.platform.salary.model.SalaryItemDTO">
+    </resultMap>
+
+    <insert id="insert">
+        INSERT INTO t_salary_item(id, name, type, rule, default_money, default_price)
+        VALUES(#{id}, #{name}, #{type}, #{rule}, #{defaultMoney}, #{defaultPrice})
+    </insert>
+
+    <update id="update">
+        UPDATE t_salary_item SET name = #{name}, default_money = #{defaultMoney}, default_price = #{defaultPrice}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM t_salary_item WHERE id = #{id}
+    </delete>
+
+    <select id="select" resultMap="SalaryItemDTO">
+        SELECT * FROM t_salary_item
+    </select>
+
+    <select id="selectById" resultMap="SalaryItem">
+        SELECT * FROM t_salary_item WHERE id = #{id}
+    </select>
+
+
+    <select id="selectBySalaryItemId" resultMap="SalaryItemDTO">
+        SELECT s.*, r.count, r.price, r.money FROM t_r_employee_salary_item r LEFT JOIN t_salary_item s ON s.id = r.salary_item_id WHERE r.salary_item_id = #{salaryItemId}
+    </select>
+
+    <select id="selectByEmployeeId" resultMap="SalaryItemDTO">
+        SELECT s.*, r.count, r.price, r.money FROM t_r_employee_salary_item r LEFT JOIN t_salary_item s ON s.id = r.salary_item_id WHERE r.employee_id = #{employeeId}
+    </select>
+
+    <select id="selectFixedByEmployeeIdAndMonth" resultMap="SalaryItemDTO">
+        SELECT s.*, r.count, r.price, r.money FROM t_employee_salary_item r LEFT JOIN t_salary_item s ON s.id = r.salary_item_id WHERE r.employee_id = #{employeeId} AND r.month = #{month}
+    </select>
+
+
+    <insert id="insertEmployeeSalaryItem">
+        INSERT INTO t_r_employee_salary_item(employee_id, salary_item_id, count, price, money)
+        VALUES(#{employeeId}, #{salaryItemId}, #{count}, #{price}, #{money})
+    </insert>
+
+    <update id="updateEmployeeSalaryItem">
+        UPDATE t_r_employee_salary_item SET count = #{count}, price = #{price}, money = #{money} WHERE employee_id = #{employeeId} AND salary_item_id = #{salaryItemId}
+    </update>
+
+    <delete id="deleteEmployeeSalaryItem">
+        DELETE FROM t_r_employee_salary_item WHERE employee_id = #{employeeId} AND salary_item_id = #{salaryItemId}
+    </delete>
+
+    <update id="resetEmployeeSalaryItem">
+        UPDATE t_r_employee_salary_item r, t_employee e, t_salary_item si, t_dept d SET r.count = NULL, r.money = NULL
+        WHERE si.id = r.salary_item_id AND si.rule = 2 AND e.id = r.employee_id AND d.id = e.dept_id
+        <if test="id != null">
+            AND r.employee_id = #{id}
+        </if>
+        <if test="deptId != null">
+            AND d.dept_path like CONCAT('%.', #{deptId}, '%')
+        </if>
+    </update>
+
+    <select id="selectByEmployeeIdAndSalaryItemId" resultMap="SalaryItemDTO">
+        SELECT s.*, r.count, r.price, r.money FROM t_r_employee_salary_item r LEFT JOIN t_salary_item s ON s.id = r.salary_item_id WHERE r.employee_id = #{employeeId} AND r.salary_item_id = #{salaryItemId}
+    </select>
+
+</mapper>

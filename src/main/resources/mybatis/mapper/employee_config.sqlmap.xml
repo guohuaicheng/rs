@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qiqi.rs.admin.platform.employee.dao.EmployeeConfigDao">
+
+    <resultMap id="EmployeeConfigDO" type="com.qiqi.rs.admin.platform.employee.model.EmployeeConfig">
+    </resultMap>
+
+    <resultMap id="EmployeeConfigDTO" type="com.qiqi.rs.admin.platform.employee.model.EmployeeConfigDTO"
+               extends="EmployeeConfigDO">
+    </resultMap>
+
+    <insert id="insert">
+        INSERT INTO t_employee_config(id, field, field_name, field_type, state, candidate_val, format)
+        VALUES(#{id}, #{field}, #{fieldName}, #{fieldType}, 1, #{candidateVal}, #{format})
+    </insert>
+
+    <update id="update">
+        UPDATE t_employee_config SET field_name = #{fieldName}, candidate_val = #{candidateVal}, format=#{format}
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+        UPDATE t_employee_config SET state = 0
+        WHERE id = #{id}
+    </update>
+
+    <select id="select" resultMap="EmployeeConfigDTO">
+        SELECT * FROM t_employee_config WHERE state = 1
+    </select>
+
+    <select id="selectMaxId" resultType="java.lang.Long">
+        SELECT id FROM t_employee_config ORDER BY ID DESC LIMIT 1
+    </select>
+    <!--<select id="select" resultMap="EmployeeDTO">-->
+    <!--SELECT-->
+    <!--id, others as others_info-->
+    <!--FROM t_employee e-->
+    <!--<where>-->
+    <!--<foreach collection="othersQueryMap" index="key" item="value" separator="and">-->
+    <!--others->'$.${key}' = #{value}-->
+    <!--</foreach>-->
+    <!--</where>-->
+    <!--</select>-->
+
+    <!--<select id="selectBasicInfo" resultMap="user_column_map">-->
+    <!--SELECT-->
+    <!--u.user_id,-->
+    <!--u.user_code,-->
+    <!--u.nickname-->
+    <!--FROM p_user_info u-->
+    <!--<where>-->
+    <!--AND del_flag = 0 AND enable_flag = 1-->
+    <!--<if test="userId != null">AND u.user_id = #{userId}</if>-->
+    <!--<if test="nickname != null">AND u.nickname = #{nickname}</if>-->
+    <!--<if test="userCode != null">AND u.user_code = #{userCode}</if>-->
+    <!--<if test="role != null">AND u.role = #{role}</if>-->
+    <!--</where>-->
+    <!--</select>-->
+
+    <!--<select id="selectByCodeForCheckIfExists" resultMap="user_column_map">-->
+    <!--SELECT user_id, user_code-->
+    <!--FROM p_user_info-->
+    <!--WHERE del_flag = 0 AND user_code = #{userCode} limit 1-->
+    <!--</select>-->
+
+    <!--<select id="selectByNameForCheckIfExists" resultMap="user_column_map">-->
+    <!--SELECT user_id, nickname-->
+    <!--FROM p_user_info-->
+    <!--WHERE del_flag = 0 AND nickname = #{nickname} limit 1-->
+    <!--</select>-->
+
+    <!--<select id="selectByMobileForCheckIfExists" resultMap="user_column_map">-->
+    <!--SELECT user_id, mobile_phone-->
+    <!--FROM p_user_info-->
+    <!--WHERE del_flag = 0 AND mobile_phone = #{mobilePhone} limit 1-->
+    <!--</select>-->
+
+    <!--&lt;!&ndash;<select id="selectInviteTenant" resultMap="tenant_info_map">&ndash;&gt;-->
+    <!--&lt;!&ndash;SELECT&ndash;&gt;-->
+    <!--&lt;!&ndash;i.created_time,&ndash;&gt;-->
+    <!--&lt;!&ndash;t.username,&ndash;&gt;-->
+    <!--&lt;!&ndash;t.tenant_name,&ndash;&gt;-->
+    <!--&lt;!&ndash;t.mobile_phone&ndash;&gt;-->
+    <!--&lt;!&ndash;FROM p_tenant_invite i&ndash;&gt;-->
+    <!--&lt;!&ndash;LEFT JOIN p_tenant_info t ON i.invite_id = t.tenant_id&ndash;&gt;-->
+    <!--&lt;!&ndash;WHERE i.tenant_id = #{userId}&ndash;&gt;-->
+    <!--&lt;!&ndash;</select>&ndash;&gt;-->
+
+    <!--<select id="selectById" resultMap="user_column_map">-->
+    <!--SELECT-->
+    <!--<include refid="all_column"/>-->
+    <!--FROM p_user_info-->
+    <!--WHERE user_id = #{userId} AND del_flag = 0-->
+    <!--</select>-->
+
+    <!--<select id="selectByIdForOpt" resultMap="user_column_map">-->
+    <!--SELECT-->
+    <!--u.user_id,-->
+    <!--u.username,-->
+    <!--u.nickname,-->
+    <!--u.user_code,-->
+    <!--u.mobile_phone,-->
+    <!--u.role,-->
+    <!--u.permission,-->
+    <!--u.description,-->
+    <!--u.enable_flag,-->
+    <!--u.created_time,-->
+    <!--a.password-->
+    <!--FROM p_user_info u-->
+    <!--LEFT JOIN p_user_auth a ON u.user_id = a.user_id &lt;!&ndash;    用于编辑用户密码    &ndash;&gt;-->
+    <!--WHERE u.user_id = #{userId} AND u.del_flag = 0-->
+    <!--</select>-->
+
+    <!--<select id="selectByCode" resultMap="user_column_map">-->
+    <!--SELECT-->
+    <!--<include refid="all_column"/>-->
+    <!--FROM p_user_info-->
+    <!--WHERE user_code = #{user_code}-->
+    <!--</select>-->
+
+    <!--<delete id="delete">-->
+    <!--DELETE FROM p_user_info where user_id = #{userId}-->
+    <!--</delete>-->
+</mapper>

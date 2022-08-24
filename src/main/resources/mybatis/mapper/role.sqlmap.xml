@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qiqi.rs.admin.platform.user.dao.RoleDao">
+
+    <resultMap id="role_column_map" type="com.qiqi.rs.admin.platform.user.model.Role">
+        <result column="role_id" property="roleId"/>
+        <result column="role_code" property="roleCode"/>
+        <result column="role_name" property="roleName"/>
+        <result column="description" property="description"/>
+        <result column="enable_flag" property="enableFlag"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="created_user" property="createdUser"/>
+        <result column="created_time" property="createdTime"/>
+        <result column="updated_user" property="updatedUser"/>
+        <result column="updated_time" property="updatedTime"/>
+        <result column="created_device" property="createdDevice"/>
+        <result column="created_device_ip" property="createdDeviceIp"/>
+        <result column="updated_device" property="updatedDevice"/>
+        <result column="updated_device_ip" property="updatedDeviceIp"/>
+    </resultMap>
+
+    <sql id="all_column">
+        role_id,
+        role_code,
+        role_name,
+        description,
+        enable_flag,
+        del_flag,
+        created_user,
+        created_time,
+        updated_user,
+        updated_time,
+        created_device,
+        created_device_ip,
+        updated_device,
+        updated_device_ip
+    </sql>
+
+    <insert id="insert">
+        INSERT INTO p_role
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            role_id,
+            role_code,
+            role_name,
+            <if test="description != null">description,</if>
+            <if test="createdUser != null">created_user,</if>
+            <if test="createdTime != null">created_time,</if>
+            <if test="updatedUser != null">updated_user,</if>
+            <if test="updatedTime != null">updated_time,</if>
+            <if test="createdDevice != null">created_device,</if>
+            <if test="createdDeviceIp != null">created_device_ip,</if>
+            <if test="updatedDevice != null">updated_device,</if>
+            <if test="updatedDeviceIp != null">updated_device_ip,</if>
+            <if test="keyword != null">keyword,</if>
+            <if test="lastSyncTime != null">last_sync_time,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            #{roleId},
+            #{roleCode},
+            #{roleName},
+            <if test="description != null">#{description},</if>
+            <if test="createdUser != null">#{createdUser},</if>
+            <if test="createdTime != null">#{createdTime},</if>
+            <if test="updatedUser != null">#{updatedUser},</if>
+            <if test="updatedTime != null">#{updatedTime},</if>
+            <if test="createdDevice != null">#{createdDevice},</if>
+            <if test="createdDeviceIp != null">#{createdDeviceIp},</if>
+            <if test="updatedDevice != null">#{updatedDevice},</if>
+            <if test="updatedDeviceIp != null">#{updatedDeviceIp},</if>
+            <if test="keyword != null">#{keyword},</if>
+            <if test="lastSyncTime != null">#{lastSyncTime},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+        </trim>
+    </insert>
+
+    <update id="update">
+        UPDATE p_role
+        <set>
+            <if test="roleName != null">role_name = #{roleName},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="enableFlag != null">enable_flag = #{enableFlag},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="updatedUser != null">updated_user = #{updatedUser},</if>
+            <if test="updatedTime != null">updated_time = #{updatedTime},</if>
+            <if test="updatedDevice != null">updated_device = #{updatedDevice},</if>
+            <if test="updatedDeviceIp != null">updated_device_ip = #{updatedDeviceIp}</if>
+        </set>
+        WHERE role_id = #{roleId}
+    </update>
+
+    <select id="select" resultMap="role_column_map">
+        SELECT
+        <include refid="all_column"/>
+        FROM p_role
+        <where>
+            <if test="roleId != null">AND role_id = #{roleId}</if>
+            <if test="roleCode != null">AND role_code = #{roleCode}</if>
+            <if test="roleName != null">AND role_name = #{roleName}</if>
+            <if test="description != null">AND description = #{description}</if>
+            <if test="enableFlag != null">AND enable_flag = #{enableFlag}</if>
+            <if test="delFlag != null">AND del_flag = #{delFlag}</if>
+            <if test="createdUser != null">AND created_user = #{createdUser}</if>
+            <if test="createdTime != null">AND created_time = #{createdTime}</if>
+            <if test="updatedUser != null">AND updated_user = #{updatedUser}</if>
+            <if test="updatedTime != null">AND updated_time = #{updatedTime}</if>
+            <if test="createdDevice != null">AND created_device = #{createdDevice}</if>
+            <if test="createdDeviceIp != null">AND created_device_ip = #{createdDeviceIp}</if>
+            <if test="updatedDevice != null">AND updated_device = #{updatedDevice}</if>
+            <if test="updatedDeviceIp != null">AND updated_device_ip = #{updatedDeviceIp}</if>
+        </where>
+    </select>
+
+    <delete id="delete">
+        DELETE FROM p_role where role_id = #{roleId}
+    </delete>
+</mapper>

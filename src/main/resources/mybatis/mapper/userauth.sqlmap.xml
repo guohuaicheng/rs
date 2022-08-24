@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qiqi.rs.admin.platform.user.dao.UserAuthDao">
+
+    <resultMap id="AllColumnMap" type="com.qiqi.rs.admin.platform.user.model.UserAuth">
+        <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="user_code" property="userCode"/>
+        <result column="mobile_phone" property="mobilePhone"/>
+    </resultMap>
+
+    <sql id="all_column">
+        user_id,
+        username,
+        password,
+        user_code,
+        mobile_phone
+    </sql>
+
+    <insert id="insert">
+        INSERT INTO p_user_auth
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="username != null">username,</if>
+            <if test="password != null">password,</if>
+            <if test="userCode != null">user_code,</if>
+            <if test="mobilePhone != null">mobile_phone,</if>
+        </trim>
+        VALUES
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="username != null">#{username},</if>
+            <if test="password != null">#{password},</if>
+            <if test="userCode != null">#{userCode},</if>
+            <if test="mobilePhone != null">#{mobilePhone},</if>
+        </trim>
+    </insert>
+
+    <update id="update">
+        UPDATE p_user_auth
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="userCode != null">user_code = #{userCode},</if>
+            <if test="mobilePhone != null">mobile_phone = #{mobilePhone},</if>
+        </set>
+        WHERE user_id = #{userId}
+    </update>
+
+    <select id="select" resultMap="AllColumnMap">
+        SELECT
+        <include refid="all_column"/>
+        FROM p_user_auth
+        <where>
+            <if test="userId != null">AND user_id = #{userId}</if>
+            <if test="username != null">AND username = #{username}</if>
+            <if test="password != null">AND password = #{password}</if>
+            <if test="userCode != null">AND user_code = #{userCode}</if>
+            <if test="mobilePhone != null">AND mobile_phone = #{mobilePhone}</if>
+        </where>
+    </select>
+
+    <select id="selectByUsername" resultMap="AllColumnMap">
+        SELECT
+        a.user_id,
+        a.username,
+        a.password,
+        a.user_code,
+        a.mobile_phone
+        FROM p_user_auth a
+        INNER JOIN p_user_info u ON u.user_id = a.user_id
+        WHERE u.del_flag = 0 AND (a.username = #{username} or a.mobile_phone = #{username} or a.user_code = #{username})
+    </select>
+
+    <delete id="delete">
+        DELETE FROM p_user_auth where user_id = #{id}
+    </delete>
+</mapper>

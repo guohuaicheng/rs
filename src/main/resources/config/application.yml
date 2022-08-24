@@ -1,0 +1,29 @@
+server:
+  port: 7019
+  servlet:
+    context-path: /api/
+  tomcat:
+    uri-encoding: UTF-8
+#    max-threads: 1000
+#    max-connections: 20000
+
+snowflake:
+  workId: 1
+
+spring:
+  profiles:
+    active: dev
+  http:
+    encoding:
+      charset: utf-8
+      enabled: true
+      force: true
+#  messages:
+#    basename: i18n.admin_exception_message
+#    encoding: UTF-8
+
+
+mybatis:
+  mapperLocations: classpath:mybatis/mapper/*.xml
+  config-location: classpath:mybatis/mybatis-config.xml
+

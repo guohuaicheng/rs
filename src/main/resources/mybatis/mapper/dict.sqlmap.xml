@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qiqi.rs.admin.platform.dict.dao.DictDao">
+
+    <resultMap id="Dict" type="com.qiqi.rs.admin.platform.dict.model.Dict"></resultMap>
+    <resultMap id="DictInfo" type="com.qiqi.rs.admin.platform.dict.model.DictInfo"></resultMap>
+
+    <resultMap id="DictWithInfo" type="com.qiqi.rs.admin.platform.dict.model.Dict">
+        <collection property="dictInfoList" ofType="com.qiqi.rs.admin.platform.dict.model.DictInfo"
+                    select="com.qiqi.rs.admin.platform.dict.dao.DictDao.selectInfoByDictId" column="{dictId=id}">
+        </collection>
+    </resultMap>
+
+    <insert id="insert">
+        INSERT INTO p_dict(id, dict_code, dict_name, description, enable_flag, del_flag)
+        VALUES(#{id}, #{dictCode}, #{dictName}, #{description}, 1, 0)
+    </insert>
+
+    <update id="update">
+        UPDATE p_dict
+        <set>
+            <if test="dictName != null and dictName != ''">
+                dict_name = #{dictName}
+            </if>
+            <if test="description != null">
+                description = #{description}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="delete">
+        UPDATE p_dict SET del_flag = 1 WHERE id = #{id}
+    </update>
+
+    <select id="selectById" resultMap="Dict">
+        SELECT * FROM p_dict WHERE id = #{id}
+    </select>
+
+    <select id="selectWithInfo" resultMap="DictWithInfo">
+        SELECT
+        t.id, t.dict_code, t.dict_name
+        FROM p_dict t
+        <where>
+            t.del_flag = 0
+            <if test="kw != null and kw.trim() != ''">
+                <bind name="kw1" value="'%' + _parameter.kw + '%'"/>
+                AND (t.dict_code LIKE #{kw1} OR t.dict_name LIKE #{kw1})
+            </if>
+        </where>
+    </select>
+
+
+    <select id="selectInfoByDictId" resultMap="DictInfo">
+        SELECT
+        t.id, t.dict_id, t.dict_name, t.dict_value
+        FROM p_dict_info t
+        WHERE t.dict_id = #{dictId} AND t.del_flag = 0
+    </select>
+
+
+
+    <insert id="insertInfo">
+        INSERT INTO p_dict_info(id, dict_id, dict_value, dict_name, description, enable_flag, del_flag)
+        VALUES(#{id}, #{dictId}, #{dictValue}, #{dictName}, #{description}, 1, 0)
+    </insert>
+
+    <update id="updateInfo">
+        UPDATE p_dict_info
+        <set>
+            <if test="dictName != null and dictName != ''">
+                dict_name = #{dictName}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteInfo">
+        UPDATE p_dict_info SET del_flag = 1 WHERE id = #{id}
+    </update>
+
+    <select id="selectInfoById" resultMap="DictInfo">
+        SELECT * FROM p_dict_info WHERE id = #{id}
+    </select>
+
+
+</mapper>

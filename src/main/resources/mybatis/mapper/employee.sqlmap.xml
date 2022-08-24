@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qiqi.rs.admin.platform.employee.dao.EmployeeDao">
+
+    <resultMap id="EmployeeDO" type="com.qiqi.rs.admin.platform.employee.model.Employee">
+    </resultMap>
+
+    <resultMap id="EmployeeDTO" type="com.qiqi.rs.admin.platform.employee.model.EmployeeDTO" extends="EmployeeDO">
+        <result column="dept_id" property="dept.id"></result>
+        <result column="dept_name" property="dept.deptName"></result>
+        <result column="dept_path" property="dept.deptPath"></result>
+        <result column="gw_dept_name" property="parentDept.deptName"></result>
+    </resultMap>
+
+    <resultMap id="EmployeeDTOWithSalaryItem" type="com.qiqi.rs.admin.platform.employee.model.EmployeeDTO"
+               extends="EmployeeDTO">
+        <collection property="salaryItemList" ofType="com.qiqi.rs.admin.platform.salary.model.SalaryItem"
+                    select="com.qiqi.rs.admin.platform.salary.dao.SalaryItemDao.selectByEmployeeId"
+                    column="{employeeId=id}"/>
+    </resultMap>
+
+    <resultMap id="EmployeeDTOWithSalary" type="com.qiqi.rs.admin.platform.employee.model.EmployeeDTO"
+               extends="EmployeeDTO">
+        <collection property="salaryItemList" ofType="com.qiqi.rs.admin.platform.salary.model.SalaryItem"
+                    select="com.qiqi.rs.admin.platform.salary.dao.SalaryItemDao.selectFixedByEmployeeIdAndMonth"
+                    column="{employeeId=id, month=month}"/>
+    </resultMap>
+
+    <sql id="AllColumn">
+        id,
+        employee_code,
+        employee_name,
+        id_no,
+        dept_id,
+        join_date,
+        leave_date,
+        state,
+        others
+    </sql>
+
+    <insert id="insert">
+        INSERT INTO t_employee(<include refid="AllColumn"/>)
+        VALUES (
+        #{id},
+        #{employeeCode},
+        #{employeeName},
+        #{idNo},
+        #{deptId},
+        null,
+        null,
+        1,
+        #{othersInfo})
+    </insert>
+
+    <update id="update">
+        UPDATE t_employee SET employee_name = #{employeeName}, id_no = #{idNo}, dept_id = #{deptId}, others = #{othersInfo} WHERE id = #{id}
+    </update>
+
+    <update id="updateJoin">
+        UPDATE t_employee SET join_date = #{joinDate}, state = #{state} WHERE id = #{id}
+    </update>
+
+    <update id="updateLeave">
+        UPDATE t_employee SET leave_date = #{leaveDate}, state = #{state} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM t_employee WHERE id = #{id}
+    </delete>
+
+    <select id="selectByDeptId" resultMap="EmployeeDTO">
+        SELECT
+        id, others as others_info
+        FROM t_employee e WHERE dept_id = #{deptId}
+    </select>
+
+    <select id="select" resultMap="EmployeeDTO">
+        SELECT
+        e.id, e.employee_code, e.employee_name, e.dept_id, e.state, e.id_no, e.join_date, e.leave_date, e.others as
+        others_info,
+        IFNULL(gw.dept_name, bm.dept_name) as dept_name, IFNULL(gw.dept_path, bm.dept_path) as dept_path,
+        gwbm.dept_name as gw_dept_name
+        FROM t_employee e
+        LEFT JOIN t_dept gw ON gw.id = e.dept_id AND gw.mode = 2
+        LEFT JOIN t_dept gwbm ON gwbm.id = gw.parent_id AND gwbm.mode = 1
+
+        LEFT JOIN t_dept bm ON bm.id = e.dept_id AND bm.mode = 1
+        <where>
+            <if test="othersQueryMap != null">
+                <foreach collection="othersQueryMap" index="key" item="val" separator="and">
+                    <choose>
+                        <when test="val.fieldType == 4">
+                            e.others->'$.${key}' >= #{val.st} AND e.others->'$.${key}' &lt;= #{val.et}
+                        </when>
+                        <when test="val.fieldType == 2 or val.fieldType == 3">
+                            <!--<if test="val.st != null">-->
+                            <!--CAST(e.others->'$.${key}' as signed) >= CAST(#{val.st} as signed)-->
+                            <!--</if>-->
+                            <!--<if test="val.et != null">-->
+                            <!--CAST(e.others->'$.${key}' as signed) &lt;= CAST(#{val.et} as signed)-->
+                            <!--</if>-->
+                            <!--CAST(e.others->'$.${key}' as signed) = CAST(#{val.value} as signed)-->
+
+                            <choose>
+                                <when test="val.st != null and val.et != null">
+                                    CAST(e.others->'$.${key}' as signed) BETWEEN CAST(#{val.st} as signed) AND
+                                    CAST(#{val.et} as signed)
+                                </when>
+                                <when test="val.st != null">
+                                    CAST(e.others->'$.${key}' as signed) >= CAST(#{val.st} as signed)
+                                </when>
+                                <when test="val.et != null">
+                                    CAST(e.others->'$.${key}' as signed) &lt;= CAST(#{val.et} as signed)
+                                </when>
+                            </choose>
+                        </when>
+                        <otherwise>
+                            e.others->'$.${key}' like CONCAT('%', #{val.value}, '%')
+                        </otherwise>
+                    </choose>
+                </foreach>
+            </if>
+            <if test="state != null">
+                AND e.state = #{state}
+            </if>
+            <if test="deptId != null">
+                AND (gw.dept_path like CONCAT('%.', #{deptId}, '%') OR bm.dept_path like CONCAT('%.', #{deptId}, '%'))
+            </if>
+            <if test="kw != null and kw.trim() != ''">
+                <bind name="kw1" value="'%' + _parameter.kw + '%'"/>
+                AND (e.employee_code LIKE #{kw1}
+                OR e.employee_name LIKE #{kw1})
+            </if>
+            <if test="joinDateS != null">
+                AND e.join_date >= #{joinDateS}
+            </if>
+            <if test="joinDateE != null">
+                AND e.join_date &lt;= #{joinDateE}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByIdForOpt" resultMap="EmployeeDTO">
+        SELECT
+        e.id, e.others as others_info
+        FROM t_employee e WHERE e.id = #{id}
+    </select>
+
+    <select id="selectWithSalaryItem" resultMap="EmployeeDTOWithSalaryItem">
+        SELECT
+        e.id, e.employee_code, e.employee_name, e.dept_id, e.state, e.id_no, e.join_date, e.leave_date,
+        IFNULL(gw.dept_name, bm.dept_name) as dept_name, IFNULL(gw.dept_path, bm.dept_path) as dept_path,
+        gwbm.dept_name as gw_dept_name
+        FROM t_employee e
+        LEFT JOIN t_dept gw ON gw.id = e.dept_id AND gw.mode = 2
+        LEFT JOIN t_dept gwbm ON gwbm.id = gw.parent_id AND gwbm.mode = 1
+
+        LEFT JOIN t_dept bm ON bm.id = e.dept_id AND bm.mode = 1
+        <where>
+            <if test="id != null">
+                AND e.id = #{id}
+            </if>
+            <if test="state != null">
+                AND e.state = #{state}
+            </if>
+            <if test="deptId != null">
+                AND (gw.dept_path like CONCAT('%.', #{deptId}, '%') OR bm.dept_path like CONCAT('%.', #{deptId}, '%'))
+            </if>
+            <if test="kw != null and kw.trim() != ''">
+                <bind name="kw1" value="'%' + _parameter.kw + '%'"/>
+                AND (e.employee_code LIKE #{kw1}
+                OR e.employee_name LIKE #{kw1})
+            </if>
+        </where>
+    </select>
+
+    <select id="selectWithSalary" resultMap="EmployeeDTOWithSalary">
+        SELECT
+        e.id, e.employee_code, '${month}' as month, e.employee_name, e.dept_id, e.state, e.id_no, e.join_date, e.leave_date,
+        IFNULL(gw.dept_name, bm.dept_name) as dept_name, IFNULL(gw.dept_path, bm.dept_path) as dept_path,
+        gwbm.dept_name as gw_dept_name
+        FROM t_employee e
+        LEFT JOIN t_dept gw ON gw.id = e.dept_id AND gw.mode = 2
+        LEFT JOIN t_dept gwbm ON gwbm.id = gw.parent_id AND gwbm.mode = 1
+
+        LEFT JOIN t_dept bm ON bm.id = e.dept_id AND bm.mode = 1
+        <where>
+            <if test="id != null">
+                AND e.id = #{id}
+            </if>
+            <if test="state != null">
+                AND e.state = #{state}
+            </if>
+            <if test="deptId != null">
+                AND (gw.dept_path like CONCAT('%.', #{deptId}, '%') OR bm.dept_path like CONCAT('%.', #{deptId}, '%'))
+            </if>
+            <if test="kw != null and kw.trim() != ''">
+                <bind name="kw1" value="'%' + _parameter.kw + '%'"/>
+                AND (e.employee_code LIKE #{kw1}
+                OR e.employee_name LIKE #{kw1})
+            </if>
+        </where>
+    </select>
+</mapper>

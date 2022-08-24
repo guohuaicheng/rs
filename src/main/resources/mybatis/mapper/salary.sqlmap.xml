@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.qiqi.rs.admin.platform.salary.dao.SalaryDao">
+
+    <resultMap id="Salary" type="com.qiqi.rs.admin.platform.salary.model.Salary">
+    </resultMap>
+
+    <resultMap id="SalaryDTO" type="com.qiqi.rs.admin.platform.salary.model.SalaryDTO">
+    </resultMap>
+
+    <insert id="insertList">
+        INSERT INTO t_salary(id, employee_id, dept_id, month, salary) VALUES
+        <foreach collection="salaryList" item="salary" index="index" separator=",">
+            (
+            #{salary.id},
+            #{salary.employeeId},
+            #{salary.deptId},
+            #{salary.month},
+            #{salary.salary}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM t_salary
+        <where>
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+            <if test="employeeId != null">
+                AND employee_id = #{employeeId}
+            </if>
+            <if test="month != null">
+                AND month = #{month}
+            </if>
+        </where>
+    </delete>
+
+    <select id="select" resultMap="SalaryDTO">
+        SELECT * FROM t_salary
+        <where>
+            <if test="employeeId != null">
+                AND employee_id = #{employeeId}
+            </if>
+            <if test="month != null">
+                AND month = #{month}
+            </if>
+        </where>
+    </select>
+
+
+
+    <insert id="insertEmployeeSalaryItemList">
+        INSERT INTO t_employee_salary_item(id, salary_id, employee_id, salary_item_id, month, count, price, money) VALUES
+        <foreach collection="itemList" item="it" index="index" separator=",">
+            (
+            #{it.id},
+            #{it.salaryId},
+            #{it.employeeId},
+            #{it.salaryItemId},
+            #{it.month},
+            #{it.count},
+            #{it.price},
+            #{it.money}
+            )
+        </foreach>
+    </insert>
+
+    <delete id="deleteEmployeeSalaryItem">
+        DELETE FROM t_employee_salary_item
+        <where>
+            <if test="salaryId != null">
+                AND salary_id = #{salaryId}
+            </if>
+            <if test="employeeId != null">
+                AND employee_id = #{employeeId}
+            </if>
+            <if test="month != null">
+                AND month = #{month}
+            </if>
+        </where>
+    </delete>
+</mapper>

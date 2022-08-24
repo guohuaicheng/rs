@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    druid:
+      url: jdbc:mysql://192.168.1.164:3306/rs?useUnicode=true&characterEncoding=utf-8&serverTimezone=GMT%2B8
+      username: root
+      password: 75aab574f761d22a41949998170a9eba
+      driver-class-name: com.mysql.jdbc.Driver
+      #连接池配置
+      initial-size: 3
+      max-active: 3
+      min-idle: 3
+      max-wait: 5000
+      test-on-borrow: false
+      test-on-return: false
+      test-while-idle: true
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      filters: stat,log4j2
+      connectionProperties: druid.stat.slowSqlMillis=1000;druid.stat.logSlowSql=true;druid.stat.mergeSql=true
+      stat-view:
+        enabled: true
+  redis:
+    host: 192.168.1.164
+    database: 0
+    port: 6379
+    password: 75aab574f761d22a41949998170a9eba
+
+  cache:
+      redis:
+        time-to-live: 1d
+  qiqi:
+    core:
+      client-info-filter:
+        enabled: true
+
+  aspect:
+    log:
+      enabled: false
